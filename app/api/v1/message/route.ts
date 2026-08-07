@@ -12,7 +12,7 @@ export async function GET(request: Request)
 
     if(error)
     {
-        console.log(error)
+        console.log("[GET] /message", error)
     }
 
     return Response.json(user)

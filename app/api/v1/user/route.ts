@@ -7,7 +7,7 @@ export async function GET()
 
     if(error)
     {
-        console.log(error)
+        console.log("[GET] /user", error)
     }
 
     return Response.json(user)

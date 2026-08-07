@@ -27,6 +27,8 @@ export async function POST(request: Request)
         loadingSeconds: 5
     } satisfies LineMessageDisplayLoadingRequest
 
+    await lineMessagingApiClient("POST", "/chat/loading/start", loadingMessageBody)
+
     const supabase = await createClient()
     const [{ error }] = await Promise.all([
         supabase
@@ -41,12 +43,11 @@ export async function POST(request: Request)
             is_self: true,
         }),
         lineMessagingApiClient("POST", "/message/push", pushMessageBody),
-        lineMessagingApiClient("POST", "/chat/loading/start", loadingMessageBody),
     ])
 
     if(error)
     {
-        console.log(error)
+        console.log("[POST] /message/send", error)
     }
 
     return Response.json({})

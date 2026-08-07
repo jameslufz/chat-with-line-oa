@@ -29,6 +29,11 @@ const lineMessagingApiClient: ApiClient = async (method, path, payload, moreHead
     })
 
     const data = await res.json()
+    if(path.includes("chat/loading/start"))
+    {
+        console.log(data)
+    }
+
     return data
 }
 

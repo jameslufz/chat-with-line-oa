@@ -46,7 +46,7 @@ export async function POST(req: Request)
 
                     if("message" in profile && typeof profile.message === "string")
                     {
-                        console.log(profile)
+                        console.log("error profile", profile)
                         return Response.json({})
                     }
 

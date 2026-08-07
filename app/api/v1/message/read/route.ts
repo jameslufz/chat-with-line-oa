@@ -24,7 +24,7 @@ export async function POST(request: Request)
 
     if(update.error)
     {
-        console.log(update.error)
+        console.log("[POST] /message/read", update.error)
     }
 
     return Response.json({})

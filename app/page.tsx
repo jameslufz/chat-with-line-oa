@@ -152,7 +152,7 @@ export default function Home()
                     chatArea.scrollTo(0, chatArea.scrollHeight)
 
                     if(!message.is_self && message.mark_as_read_token) {
-                        markAsRead(message.user_id, message.mark_as_read_token).catch()
+                        await markAsRead(message.user_id, message.mark_as_read_token)
                     }
                 }
             }
