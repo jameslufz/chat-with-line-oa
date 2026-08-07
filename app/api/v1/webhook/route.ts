@@ -1,4 +1,4 @@
-import LineMessagingApiClient from "@/lib/messaging-api/client"
+import lineMessagingApiClient from "@/lib/messaging-api/client"
 import { GetProfileResponse } from "@/lib/messaging-api/client.interface"
 import { WebhookRequest } from "@/lib/messaging-api/webhook.interface"
 import { createClient } from "@/lib/suprabase/server"
@@ -17,7 +17,7 @@ export async function POST(req: Request)
         {
             if(["follow","unfollow"].includes(event.type))
             {
-                const profile = await LineMessagingApiClient<object, GetProfileResponse>("GET", `/profile/${event.source.userId}`)
+                const profile = await lineMessagingApiClient<object, GetProfileResponse>("GET", `/profile/${event.source.userId}`)
 
                 if("message" in profile && typeof profile.message === "string")
                 {
@@ -41,7 +41,7 @@ export async function POST(req: Request)
 
                 if(!data || (data && data.length === 0))
                 {
-                    const profile = await LineMessagingApiClient<object, GetProfileResponse>("GET", `https://api.line.me/v2/bot/profile/${event.source.userId}`)
+                    const profile = await lineMessagingApiClient<object, GetProfileResponse>("GET", `https://api.line.me/v2/bot/profile/${event.source.userId}`)
 
                     if("message" in profile && typeof profile.message === "string")
                     {
@@ -66,6 +66,7 @@ export async function POST(req: Request)
                     sticker_id: event.message.stickerId,
                     package_id: event.message.packageId,
                     sent_at: new Date(),
+                    is_self: false,
                 })
 
                 if(error)

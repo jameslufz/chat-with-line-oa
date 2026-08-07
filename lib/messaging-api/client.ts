@@ -1,11 +1,23 @@
+import { SendMessageRequest } from "@/app/api/v1/message/send/route"
+
 const accessToken = process.env.CHANNEL_ACCESS_TOKEN as string
 
-const LineMessagingApiClient: ApiClient = async (method, api, payload) =>
+const lineMessagingApiClient: ApiClient = async (method, api, payload, moreHeaders?: Record<string, string>[]) =>
 {
     const headers = new Headers()
     headers.append("Content-type", "application/json")
     headers.append("Accept", "*/*")
     headers.append("Authorization", "Bearer " + accessToken)
+
+    if(moreHeaders && moreHeaders.length > 0)
+    {
+        for(const header of moreHeaders)
+        {
+            const [key] = Object.keys(header)
+            const [value] = Object.values(header)
+            headers.append(key, value)
+        }
+    }
     
     const res = await fetch(api, {
         mode: "cors",
@@ -14,7 +26,6 @@ const LineMessagingApiClient: ApiClient = async (method, api, payload) =>
         body: (method !== "GET" ? JSON.stringify(payload) : undefined),
     })
 
-    console.log(api)
     const data = await res.json()
     return data
 }
@@ -22,4 +33,22 @@ const LineMessagingApiClient: ApiClient = async (method, api, payload) =>
 export type ApiMethod =  "POST" | "GET"
 export type ApiClient = <P = object, R = unknown>(method: ApiMethod, path: string, payload?: P) => Promise<R>
 
-export default LineMessagingApiClient
+export default lineMessagingApiClient
+
+export const markAsRead = (id: string, token: string) => lineMessagingApiClient(
+    "POST",
+    "/api/v1/message/read",
+    {
+        uid: id,
+        markAsReadToken: token
+    }
+)
+
+export const sendMessage = (uid: SendMessageRequest["uid"], text: SendMessageRequest["text"]) => lineMessagingApiClient(
+    "POST",
+    "/api/v1/message/send",
+    {
+        uid,
+        text,
+    }
+)

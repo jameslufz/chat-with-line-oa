@@ -15,11 +15,12 @@ export interface MessageEntity
     user_id: string
     event_id: string
     message: string
-    quote_token: string
-    mark_as_read_token: string
-    reply_token: string
+    quote_token?: string
+    mark_as_read_token?: string
+    reply_token?: string
     sticker_id?: string
     package_id?: string
-    sent_at: Date
-    read_at?: Date
+    sent_at: string
+    read_at?: string
+    is_self: boolean
 }

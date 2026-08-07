@@ -51,9 +51,17 @@ export function ChatEmptyIcon() {
     );
 }
 
-export function LoadingIcon() {
+export function LoadingIcon({ width, height }:{ width?: string; height?: string; }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" width="200" height="200" style={{ shapeRendering: "auto", display: "block" }}>
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="xMidYMid"
+            width={width || 200}
+            height={height || 200}
+            style={{ shapeRendering: "auto", display: "block" }}
+        >
             <g>
                 <circle cx="84" cy="50" r="10" fill="#b3dcff">
                     <animate attributeName="r" repeatCount="indefinite" dur="0.5952380952380952s" calcMode="spline" keyTimes="0;1" values="10;0" keySplines="0 0.5 0.5 1" begin="0s"/>
