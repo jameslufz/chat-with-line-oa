@@ -2,8 +2,10 @@
 
 import { ChatMessage } from "@/app/api/v1/message/route";
 import clsx from "clsx";
+import Image from "next/image";
 import { ReactNode, useEffect, useRef } from "react";
 
+const baseStickerUrl = "https://stickershop.line-scdn.net/stickershop/v1/sticker/%s/android/sticker.png"
 const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
 {
     const chatArea = useRef<HTMLDivElement>(null)
@@ -43,7 +45,13 @@ const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
                                         (self ? "bg-[#00B900] text-white" : "bg-gray-100 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100")
                                     )}
                                 >
-                                    {message.message}
+                                    {
+                                        message.message === "" && message.stickerId ? (
+                                            <Image src={baseStickerUrl.replaceAll("%s", message.stickerId)} width={128} height={128} alt="sticker" className="size-32" />
+                                        ) : (
+                                            message.message
+                                        )
+                                    }
                                 </div>
                                 <span
                                     className={clsx(

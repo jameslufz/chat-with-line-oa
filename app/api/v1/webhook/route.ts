@@ -86,7 +86,7 @@ export async function POST(req: Request)
                     id: uuid(),
                     user_id: event.source.userId,
                     event_id: event.webhookEventId,
-                    message: event.message.text,
+                    message: event.message.text || "",
                     quote_token: event.message.quoteToken,
                     mark_as_read_token: event.message.markAsReadToken,
                     reply_token: event.replyToken,

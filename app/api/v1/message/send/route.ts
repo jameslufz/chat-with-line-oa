@@ -12,7 +12,7 @@ export async function POST(request: Request)
 
     const now = new Date()
 
-    const body = {
+    const pushMessageBody = {
         to: userId,
         messages: [
             {
@@ -20,7 +20,12 @@ export async function POST(request: Request)
                 text,
             }
         ]
-     } satisfies LineMessagePushRequest
+    } satisfies LineMessagePushRequest
+
+    const loadingMessageBody = {
+        chatId: userId,
+        loadingSeconds: 5
+    } satisfies LineMessageDisplayLoadingRequest
 
     const supabase = await createClient()
     const [{ error }] = await Promise.all([
@@ -35,7 +40,8 @@ export async function POST(request: Request)
             read_at: now.toISOString(),
             is_self: true,
         }),
-        lineMessagingApiClient("POST", "/message/push", body),
+        lineMessagingApiClient("POST", "/message/push", pushMessageBody),
+        lineMessagingApiClient("POST", "/chat/loading/start", loadingMessageBody),
     ])
 
     if(error)
@@ -56,4 +62,10 @@ export interface LineMessagePushRequest
 {
     to: string
     messages: { type: string; text: string; }[]
+}
+
+export interface LineMessageDisplayLoadingRequest
+{
+    chatId: string
+    loadingSeconds: number
 }

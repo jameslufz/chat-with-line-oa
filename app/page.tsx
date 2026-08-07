@@ -45,7 +45,7 @@ export default function Home()
     {
         if(!listUsers || (listUsers && userQuery === "")) return listUsers
 
-        return listUsers.filter((user) => user.name.includes(userQuery))
+        return listUsers.filter((user) => new RegExp(userQuery, "gi").test(user.name))
     },
     [listUsers, userQuery])
 
