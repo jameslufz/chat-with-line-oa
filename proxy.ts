@@ -3,23 +3,24 @@ import * as crypto from "node:crypto"
 
 export async function proxy(req: NextRequest)
 {
-    const signature = req.headers.get("x-line-signature")
-    if(!signature)
+    const url = new URL(req.url)
+    if(url.pathname.includes("webhook"))
     {
-        return NextResponse.json({ message: "unauthorized" }, { status: 401 })
+        const signature = req.headers.get("x-line-signature")
+        if(!signature)
+        {
+            return NextResponse.json({ message: "unauthorized" }, { status: 401 })
+        }
+
+        const b = await req.json()
+        const isLINE = validateSignature(JSON.stringify(b), signature)
+        if(!isLINE)
+        {
+            return NextResponse.json({ message: "unauthorized" }, { status: 401 })
+        }
     }
 
-    const b = await req.json()
-    const url = new URL(req.url)
-    console.log("request info:", {
-        host: url.origin,
-        path: url.pathname,
-        method: req.method,
-        body: b,
-    })
-
-    const isLINE = validateSignature(JSON.stringify(b), signature)
-    console.log("isLINE", isLINE)
+    return NextResponse.next()
 }
 
 export const config = {

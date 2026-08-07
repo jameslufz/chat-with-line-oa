@@ -1,6 +1,24 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string
-const publicKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string
-
-export const suprabaseClient = async () => createClient(url, publicKey)
+export async function createClient() {
+    const cookieStore = await cookies()
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll()
+                },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+                    } catch {
+                        // เรียกจาก Server Component ที่ set cookie ไม่ได้ — ignore ได้ถ้ามี middleware refresh session แล้ว
+                    }
+                },
+            },
+        }
+    )
+}

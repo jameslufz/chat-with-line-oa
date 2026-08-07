@@ -7,11 +7,11 @@ This is a project about chat with `LINE Official Account` or `LINE OA` (Messagin
 - Next.js 16.3.0 (App Router)
 - TypeScript (strict mode)
 - Tailwind CSS
-- Suprabase
+- Supabase
 
 ## Project Structure
 - `app/` - routes and layouts
-- `lib/` - libaries such as suprabase
+- `lib/` - libaries such as Supabase
 - `public/` - static assets
 
 ## Commands
