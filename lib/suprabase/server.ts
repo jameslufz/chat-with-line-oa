@@ -12,11 +12,7 @@ export async function createClient() {
                     return cookieStore.getAll()
                 },
                 setAll(cookiesToSet) {
-                    try {
-                        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-                    } catch {
-                        // เรียกจาก Server Component ที่ set cookie ไม่ได้ — ignore ได้ถ้ามี middleware refresh session แล้ว
-                    }
+                    cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
                 },
             },
         }

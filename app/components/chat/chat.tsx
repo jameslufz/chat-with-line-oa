@@ -22,7 +22,7 @@ const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
 
     return (
         <div
-            className="flex-1 space-y-4 overflow-y-auto bg-gray-50 px-6 py-6 dark:bg-zinc-900"
+            className="flex flex-col-reverse flex-1 space-y-4 overflow-y-auto bg-gray-50 px-6 py-6 dark:bg-zinc-900"
             id="chat_area"
             ref={chatArea}
         >

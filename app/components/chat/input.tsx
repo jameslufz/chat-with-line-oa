@@ -47,6 +47,12 @@ const InputForm: InputFormComponent = ({ user }) =>
         })
 
         setValue("text", "")
+
+        const textarea = document.querySelector<HTMLTextAreaElement>(`textarea[name="text"]`)
+        if(textarea)
+        {
+            setTimeout(() => textarea.focus(), 60)
+        }
     }
 
     const handleInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) =>

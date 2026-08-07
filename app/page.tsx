@@ -96,6 +96,10 @@ export default function Home()
         }
     }
 
+    /**
+     * 
+     * Handle add element to chat area.
+     */
     const handleSendMessage = (self: boolean, message: string, sentAt: string) =>
     {
         const chatArea = document.getElementById("chat_area")
@@ -120,7 +124,7 @@ export default function Home()
 
         divWrapper.append(divMessage)
 
-        chatArea.append(divWrapper)
+        chatArea.prepend(divWrapper)
     }
 
     const supabase = supabaseClient()
