@@ -1,24 +1,100 @@
 'use client'
 
 import { ChatMessage } from "@/app/api/v1/message/route";
+import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import Image from "next/image";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { LoadingIcon } from "../icons";
+import { LINE_STICKER_URL, MAX_CHAT_PER_PAGE } from "@/constant";
 
-const baseStickerUrl = "https://stickershop.line-scdn.net/stickershop/v1/sticker/%s/android/sticker.png"
-const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
+const ChatDisplay: ChatDisplayComponent = ({ chat, selectedUserId }) =>
 {
     const chatArea = useRef<HTMLDivElement>(null)
 
+    const [page, setPage] = useState(1)
+    const handleNextPage = useCallback(() => setPage(page+1), [page])
+
+    /**
+     * 
+     * Smooth scroll.
+     */
     useEffect(() =>
     {
-        if(chatArea.current)
+        const chatEl = chatArea.current
+        if(chatEl)
         {
-            chatArea.current.scrollIntoView({ behavior: "smooth" })
-            chatArea.current.scrollTo(0, chatArea.current.scrollHeight)
+            chatEl.scrollIntoView({ behavior: "smooth" })
+            chatEl.scrollTo(0, chatEl.scrollHeight)
         }
     },
     [chat])
+
+    const [moreMessageStore, setMoreMessageStore] = useState<ChatMessage[]>([])
+    const [isNoMoreMessages, setIsNoMoreMessages] = useState<boolean>(false)
+    const { isFetching: isLoadingMoreMessages } = useQuery({
+        queryKey: ["moreMessages", selectedUserId, page],
+        queryFn: async () =>
+        {
+            if(page > 1)
+            {
+                if(!chat) return null
+
+                const res = await fetch("/api/v1/message?uid=" + selectedUserId + "&p=" + page, { method: "GET" })
+                const data = await res.json()
+
+                if(data.length === 0)
+                {
+                    setIsNoMoreMessages(true)
+                }
+                else
+                {
+                    if(data.length < MAX_CHAT_PER_PAGE)
+                    {
+                        setIsNoMoreMessages(true)
+                    }
+
+                    setMoreMessageStore([...moreMessageStore, ...data])
+                }
+
+                return data
+            }
+
+            return []
+        },
+        enabled: (selectedUserId !== null),
+        refetchOnWindowFocus: false,
+    })
+
+    /**
+     * 
+     * Handle scroll to top.
+     */
+    useEffect(() =>
+    {
+        const chatEl = chatArea.current
+        const handleOnScroll = (e: Event) =>
+        {
+            const { scrollTop, clientHeight, scrollHeight } = e.currentTarget as HTMLDivElement
+            const isAtTop = ((Math.abs(scrollTop) + clientHeight) >= (scrollHeight - 0.5))
+            if(isAtTop && !isNoMoreMessages)
+            {
+                handleNextPage()
+            }
+        }
+
+        if(chatEl)
+        {
+            chatEl.addEventListener("scroll", handleOnScroll)
+        }
+
+        return () => {
+            if(chatEl) {
+                return chatEl.removeEventListener("scroll", handleOnScroll)
+            }
+        }
+    },
+    [handleNextPage, isNoMoreMessages])
 
     return (
         <div
@@ -27,7 +103,7 @@ const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
             ref={chatArea}
         >
             {
-                chat.map((message) =>
+                [...chat, ...moreMessageStore].map((message) =>
                 {
                     const self = message.isSelf
                     return (
@@ -47,7 +123,13 @@ const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
                                 >
                                     {
                                         message.message === "" && message.stickerId ? (
-                                            <Image src={baseStickerUrl.replaceAll("%s", message.stickerId)} width={128} height={128} alt="sticker" className="size-32" />
+                                            <Image
+                                                src={LINE_STICKER_URL.replaceAll("%s", message.stickerId)}
+                                                width={128}
+                                                height={128}
+                                                alt="sticker"
+                                                className="size-32"
+                                            />
                                         ) : (
                                             message.message
                                         )
@@ -64,7 +146,22 @@ const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
                             </div>
                         </div>
                     );
-                })}
+                })
+            }
+            {
+                isLoadingMoreMessages && (
+                    <div className="inline-flex justify-center items-center">
+                        <LoadingIcon width="60" height="60" />
+                    </div>
+                )
+            }
+            {
+                isNoMoreMessages && (
+                    <div className="inline-flex justify-center items-center">
+                        <span className="text-zinc-700 text-sm">- สิ้นสุดข้อมูล -</span>
+                    </div>
+                )
+            }
         </div>
     )
 }
@@ -72,13 +169,14 @@ const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
 export default ChatDisplay
 
 export const formatBubbleTime = (iso: string): string =>
-    new Date(iso).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })
+    new Date(iso).toLocaleTimeString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
 
 
 export interface ChatDisplayProps
 {
     children?: ReactNode
     chat: ChatMessage[]
+    selectedUserId: string
 }
 
 export type ChatDisplayComponent = (props: ChatDisplayProps) => ReactNode

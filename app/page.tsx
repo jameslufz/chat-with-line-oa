@@ -60,7 +60,7 @@ export default function Home()
         {
             if(!selectedChat) return null
 
-            const res = await fetch("/api/v1/message?uid=" + selectedChat?.userId, { method: "GET" })
+            const res = await fetch("/api/v1/message?uid=" + selectedChat?.userId + "&p=1", { method: "GET" })
             return res.json()
         },
         enabled: (selectedChat !== null),
@@ -237,7 +237,7 @@ export default function Home()
                                         </div>
                                     </header>
 
-                                    <ChatDisplay chat={chat} />
+                                    <ChatDisplay key={selectedChat.userId} chat={chat} selectedUserId={selectedChat.userId} />
                                     <InputForm user={selectedChat} />
                                 </>
                             )
