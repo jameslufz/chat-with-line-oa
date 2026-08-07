@@ -5,8 +5,8 @@ export interface UserEntity
     user_name: string
     picture_url?: string
     is_blocked: boolean
-    created_at: Date
-    updated_at?: Date
+    created_at: string
+    updated_at?: string
 }
 
 export interface MessageEntity

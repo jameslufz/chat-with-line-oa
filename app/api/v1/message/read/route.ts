@@ -19,7 +19,7 @@ export async function POST(request: Request)
             read_at: now.toISOString()
         })
         .eq("user_id", userId),
-        lineMessagingApiClient("POST", "https://api.line.me/v2/bot/chat/markAsRead", { markAsReadToken }),
+        lineMessagingApiClient("POST", "/chat/markAsRead", { markAsReadToken }),
     ])
 
     if(update.error)

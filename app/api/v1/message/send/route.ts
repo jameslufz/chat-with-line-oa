@@ -35,7 +35,7 @@ export async function POST(request: Request)
             read_at: now.toISOString(),
             is_self: true,
         }),
-        lineMessagingApiClient("POST", "https://api.line.me/v2/bot/message/push", body),
+        lineMessagingApiClient("POST", "/message/push", body),
     ])
 
     if(error)

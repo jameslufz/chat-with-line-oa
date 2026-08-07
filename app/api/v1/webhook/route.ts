@@ -17,18 +17,45 @@ export async function POST(req: Request)
         {
             if(["follow","unfollow"].includes(event.type))
             {
-                const profile = await lineMessagingApiClient<object, GetProfileResponse>("GET", `/profile/${event.source.userId}`)
-
-                if("message" in profile && typeof profile.message === "string")
+                const { data: existsUser, error: existsUserError } = await supabase.from("user").select<"*", UserEntity>().eq("user_id", event.source.userId)
+                if(existsUserError)
                 {
-                    throw new Error(profile.message)
+                    console.log("existsUserError:", existsUserError)
+                    return Response.json({})
                 }
 
-                const { error } = await insertUser(supabase, event.source.userId, profile.displayName, false, profile.pictureUrl)
-
-                if(error)
+                if(existsUser.length > 0)
                 {
-                    console.log("insert user error", error)
+                    const { error } = await supabase
+                    .from("user")
+                    .update<Partial<UserEntity>>({
+                        is_blocked: (event.type === "unfollow"),
+                        updated_at: (new Date()).toISOString()
+                    })
+                    .eq("user_id", event.source.userId)
+
+                    if(error)
+                    {
+                        console.log("update user error:", error)
+                        return Response.json({})
+                    }
+                }
+                else
+                {
+                    const profile = await lineMessagingApiClient<object, GetProfileResponse>("GET", `/profile/${event.source.userId}`)
+
+                    if("message" in profile && typeof profile.message === "string")
+                    {
+                        console.log(profile)
+                        return Response.json({})
+                    }
+
+                    const { error } = await insertUser(supabase, event.source.userId, profile.displayName, false, profile.pictureUrl)
+
+                    if(error)
+                    {
+                        console.log("insert user error", error)
+                    }
                 }
             }
             else if(event.type === "message")
@@ -41,7 +68,7 @@ export async function POST(req: Request)
 
                 if(!data || (data && data.length === 0))
                 {
-                    const profile = await lineMessagingApiClient<object, GetProfileResponse>("GET", `https://api.line.me/v2/bot/profile/${event.source.userId}`)
+                    const profile = await lineMessagingApiClient<object, GetProfileResponse>("GET", `/profile/${event.source.userId}`)
 
                     if("message" in profile && typeof profile.message === "string")
                     {
@@ -65,7 +92,7 @@ export async function POST(req: Request)
                     reply_token: event.replyToken,
                     sticker_id: event.message.stickerId,
                     package_id: event.message.packageId,
-                    sent_at: new Date(),
+                    sent_at: (new Date()).toISOString(),
                     is_self: false,
                 })
 
@@ -93,6 +120,6 @@ const insertUser =  async(supabase: Supabase, userId: string, userName: string, 
         user_name: userName,
         picture_url: pictureUrl,
         is_blocked: isBlocked,
-        created_at: new Date()
+        created_at: (new Date()).toISOString()
     })
 }

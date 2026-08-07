@@ -1,8 +1,9 @@
 import { SendMessageRequest } from "@/app/api/v1/message/send/route"
 
+const LINE_API = "https://api.line.me/v2/bot"
 const accessToken = process.env.CHANNEL_ACCESS_TOKEN as string
 
-const lineMessagingApiClient: ApiClient = async (method, api, payload, moreHeaders?: Record<string, string>[]) =>
+const lineMessagingApiClient: ApiClient = async (method, path, payload, moreHeaders?: Record<string, string>[]) =>
 {
     const headers = new Headers()
     headers.append("Content-type", "application/json")
@@ -18,7 +19,8 @@ const lineMessagingApiClient: ApiClient = async (method, api, payload, moreHeade
             headers.append(key, value)
         }
     }
-    
+
+    const api = (path.includes("/api/v1") ? path : LINE_API + path)
     const res = await fetch(api, {
         mode: "cors",
         method,

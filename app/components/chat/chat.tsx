@@ -16,7 +16,7 @@ const ChatDisplay: ChatDisplayComponent = ({ chat }) =>
             chatArea.current.scrollTo(0, chatArea.current.scrollHeight)
         }
     },
-    [])
+    [chat])
 
     return (
         <div

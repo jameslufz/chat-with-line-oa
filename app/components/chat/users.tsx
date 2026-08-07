@@ -48,14 +48,22 @@ const ListUsers: ListUsersComponent = ({
                                             <span className="truncate font-medium">
                                                 {user.name}
                                             </span>
-                                            <span className="shrink-0 text-xs text-zinc-400">
-                                                {formatListTime(user.lastUnreadAt)}
-                                            </span>
+                                            {
+                                                user.lastUnreadAt && (
+                                                    <span className="shrink-0 text-xs text-zinc-400">
+                                                        {formatListTime(user.lastUnreadAt)}
+                                                    </span>
+                                                )
+                                            }
                                         </div>
                                         <div className="mt-0.5 flex items-center justify-between gap-2">
-                                            <span className="truncate text-sm text-zinc-500 dark:text-zinc-400">
-                                                {user.markAsReadToken ? user.name : "คุณ"}: {user.lastMessage}
-                                            </span>
+                                            {
+                                                user.lastMessage && (
+                                                    <span className="truncate text-sm text-zinc-500 dark:text-zinc-400">
+                                                        {user.markAsReadToken ? user.name : "คุณ"}: {user.lastMessage}
+                                                    </span>
+                                                )
+                                            }
                                             {
                                                 user.unread > 0 ? (
                                                     <span

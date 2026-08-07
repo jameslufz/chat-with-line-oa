@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChatEmptyIcon, LoadingIcon, SearchIcon } from "./components/icons";
 import { supabaseClient } from "@/lib/suprabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { UserFriends } from "./api/v1/user/route";
 import Image from "next/image";
 import { ChatMessage } from "./api/v1/message/route";
 import { markAsRead } from "@/lib/messaging-api/client";
 import InputForm from "./components/chat/input";
-import { MessageEntity } from "@/lib/suprabase/suprabase.interface";
+import { MessageEntity, UserEntity } from "@/lib/suprabase/suprabase.interface";
 import ChatDisplay, { formatBubbleTime } from "./components/chat/chat";
 import ListUsers from "./components/chat/users";
 
@@ -55,7 +55,7 @@ export default function Home()
      */
     const [selectedChat, setSelectedChat] = useState<UserFriends | null>(null)
     const { data: chat, isFetching: isChatLoading } = useQuery<ChatMessage[]>({
-        queryKey: ["chatMessage"],
+        queryKey: ["chatMessage", selectedChat],
         queryFn: async () =>
         {
             if(!selectedChat) return null
@@ -64,6 +64,17 @@ export default function Home()
             return res.json()
         },
         enabled: (selectedChat !== null),
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5,
+    })
+
+    /**
+     * 
+     * Mutate mark as read
+     */
+    const { mutateAsync: markAsReadChat } = useMutation<unknown, Error, Pick<UserFriends, "userId" | "markAsReadToken">>({
+        mutationKey: ["markAsRead"],
+        mutationFn: async (user) => markAsRead(user.userId, user.markAsReadToken)
     })
 
     /**
@@ -74,7 +85,9 @@ export default function Home()
     {
         setSelectedChat(user)
 
-        await markAsRead(user.userId, user.markAsReadToken)
+        if(user.unread > 0) {
+            await markAsReadChat(user)
+        }
 
         const badgeUnread = document.getElementById(`unread_badge_${user.userId}`) as HTMLSpanElement
         if(badgeUnread)
@@ -115,21 +128,32 @@ export default function Home()
     {
         const channel = supabase
         .channel('messages-channel')
+        .on<UserEntity>('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user' }, () =>
+        {
+            reloadUsers().catch()
+        })
+        .on<UserEntity>('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'user' }, () =>
+        {
+            reloadUsers().catch()
+        })
         .on<MessageEntity>('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message' }, async (payload) =>
         {
             if(selectedChat)
             {
                 const message = payload.new
-                handleSendMessage(message.is_self, message.message, message.sent_at)
+                if(selectedChat.userId === message.user_id)
+                {
+                    handleSendMessage(message.is_self, message.message, message.sent_at)
 
-                const chatArea = document.getElementById("chat_area")
-                if(!chatArea) return
+                    const chatArea = document.getElementById("chat_area")
+                    if(!chatArea) return
 
-                chatArea.scroll({ behavior: "smooth" })
-                chatArea.scrollTo(0, chatArea.scrollHeight)
+                    chatArea.scroll({ behavior: "smooth" })
+                    chatArea.scrollTo(0, chatArea.scrollHeight)
 
-                if(!message.is_self && message.mark_as_read_token) {
-                    markAsRead(message.user_id, message.mark_as_read_token).catch()
+                    if(!message.is_self && message.mark_as_read_token) {
+                        markAsRead(message.user_id, message.mark_as_read_token).catch()
+                    }
                 }
             }
 
