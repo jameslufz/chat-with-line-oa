@@ -202,8 +202,15 @@ export default function Home()
                 {
                     selectedChat === null ? (
                         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-zinc-400">
-                            <ChatEmptyIcon />
-                            <p className="text-sm">เลือกผู้ใช้เพื่อเริ่มต้นการสนทนา</p>
+                            <Image
+                                src="/line-for-test.png"
+                                width={160}
+                                height={160}
+                                alt="qrcode"
+                                className="size-40"
+                                loading="eager"
+                            />
+                            <p className="text-sm">สแกนคิวอาร์โค้ดหรือแอดไลน์ @312wfath เพื่อทดสอบการโต้ตอบ</p>
                         </div>
                     ) : (
                         chat === undefined || isChatLoading ? (
