@@ -3,6 +3,7 @@ import { LoadingIcon } from "../icons"
 import { ReactNode } from "react"
 import clsx from "clsx"
 import Image from "next/image"
+import dayjs from "dayjs"
 
 const ListUsers: ListUsersComponent = ({
     users,
@@ -51,7 +52,7 @@ const ListUsers: ListUsersComponent = ({
                                             {
                                                 user.lastUnreadAt && (
                                                     <span className="shrink-0 text-xs text-zinc-400">
-                                                        {formatListTime(user.lastUnreadAt)}
+                                                        {dayjs(user.lastUnreadAt).fromNow()}
                                                     </span>
                                                 )
                                             }
@@ -87,17 +88,6 @@ const ListUsers: ListUsersComponent = ({
 }
 
 export default ListUsers
-
-const formatListTime = (iso: string): string =>
-{
-    const date = new Date(iso);
-    const now = new Date();
-    const sameDay = date.toDateString() === now.toDateString();
-    if (sameDay) {
-        return date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
-    }
-    return date.toLocaleDateString("th-TH", { day: "2-digit", month: "short" });
-}
 
 export interface ListUsersProps
 {

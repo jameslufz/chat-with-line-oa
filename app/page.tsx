@@ -12,6 +12,11 @@ import InputForm from "./components/chat/input";
 import { MessageEntity, UserEntity } from "@/lib/suprabase/suprabase.interface";
 import ChatDisplay, { formatBubbleTime } from "./components/chat/chat";
 import ListUsers from "./components/chat/users";
+import relativeTime from "dayjs/plugin/relativeTime"
+import "dayjs/locale/th" 
+import dayjs from "dayjs";
+
+dayjs.extend(relativeTime).locale("th")
 
 const headers = new Headers()
 headers.append("content-type", "application/json")
